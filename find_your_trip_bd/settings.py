@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "health_check.db",
     "django_filters",
     "recommender.apps.RecommenderConfig",
+    "django_celery_beat",
 ]
 
 MIDDLEWARE = [
@@ -146,7 +147,7 @@ REST_FRAMEWORK = {
 
 LOGGING = {
     "version": 1,
-    "disable_existing_loggers": False,
+    "disable_existing_loggers": True,
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
@@ -159,4 +160,21 @@ LOGGING = {
             "propagate": False,
         },
     },
+}
+
+# Celery Configuration
+CELERY_BROKER_URL = "redis://redis:6379/0"
+CELERY_ACCEPT_CONTENT = ["application/json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "Asia/Dhaka"
+
+# Caching (Redis)
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://redis:6379/1",
+        "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
+        "KEY_PREFIX": "travel",
+    }
 }

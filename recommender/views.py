@@ -3,11 +3,12 @@ from health_check.views import MainView
 from django.http import JsonResponse
 from rest_framework import status, viewsets
 from django.db import connection
-import logging
+from utils.logging import logger
+from recommender.services.cache_district_data import collect_and_cache_district_data
+from django.core.cache import cache
 
 
 # Create your views here.
-logger = logging.getLogger(__name__)
 
 
 class HealthCheckCustomView(MainView):
@@ -30,4 +31,12 @@ class HealthCheckCustomView(MainView):
             logger.error(f"Database check failed: {e}")
             status = 503
 
+        print(collect_and_cache_district_data())
+        example = cache.get("district_data_Dhaka_23.7115253_90.4111451")
+        if example:
+            logger.info(f"Cached data: {example}")
+        else:
+            logger.info("No cached data found.")
+
+        logger.info(f"Health check status: {status}")
         return JsonResponse({"status": status, "database": db_status}, status=status)
