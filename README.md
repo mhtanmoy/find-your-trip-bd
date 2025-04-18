@@ -3,7 +3,16 @@
 **Find You Trip BD** is a Django-based REST API that helps you discover the top 10 travel destinations in Bangladesh based on **weather conditions** and **air quality**. The API provides endpoints to fetch temperature and air quality data, as well as personalized travel recommendations based on a given location and date.
 
 ## Table of Contents
-
+- [Prerequisites](#prerequisites)
+- [Dependencies](#dependencies)
+- [Setup Using Docker](#setup-using-docker)
+  - [Clone the Repository](#clone-the-repository)
+  - [Create a `.env` File](#create-a-env-file)
+  - [Build and Start the Docker Containers](#build-and-start-the-docker-containers)
+  - [Access the API](#access-the-api)
+- [API Documentation](#api-documentation)
+- [Notes](#notes)
+- [Local Development (Optional)](#local-development-optional)
 
 
 ## Prerequisites
@@ -41,6 +50,7 @@ Start by cloning the repository to your local machine:
 ```
 git clone https://github.com/mhtanmoy/find-your-trip-bd.git
 cd find-you-trip-bd
+```
 
 ## Create a `.env` File
 
