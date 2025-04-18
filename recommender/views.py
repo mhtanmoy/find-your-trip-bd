@@ -106,7 +106,7 @@ class TravelRecommendationViewSet(viewsets.ViewSet):
             logger.error(f"Error extracting parameters: {e}")
             return ResponseWrapper(
                 status=status.HTTP_400_BAD_REQUEST,
-                error_message="Invalid parameters.",
+                error_message=f"Error extracting parameters: {e}",
                 error_code=400,
             )
 
