@@ -12,11 +12,14 @@ from utils.response_wrapper import ResponseWrapper
 from drf_yasg.utils import swagger_auto_schema
 from recommender.serializers import TravelQueryParamsSerializer, TopDistrictsSerializer
 from datetime import datetime
+
+# from rest_framework.permissions import IsAuthenticated
 import re
 import json
 
 
 class HealthCheckCustomView(MainView):
+
     def get(self, request, *args, **kwargs):
 
         plugins = []
@@ -40,6 +43,9 @@ class HealthCheckCustomView(MainView):
 
 
 class TopDistrictViewSet(viewsets.ViewSet):
+
+    # permission_classes = [IsAuthenticated] # Uncomment if you want to restrict access to authenticated users
+
     @swagger_auto_schema(
         operation_summary="Get top districts based on temperature and air quality",
         operation_description="This endpoint provides a list of top districts based on temperature and air quality.",
@@ -90,6 +96,8 @@ class TopDistrictViewSet(viewsets.ViewSet):
 
 
 class TravelRecommendationViewSet(viewsets.ViewSet):
+
+    # permission_classes = [IsAuthenticated] # Uncomment if you want to restrict access to authenticated users
 
     @swagger_auto_schema(
         operation_summary="Get travel recommendation based on location and date",
