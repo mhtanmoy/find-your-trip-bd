@@ -70,7 +70,6 @@ def get_temp_at_2pm_by_date(lat, lon):
     }
     try:
         responses = openmeteo.weather_api(url, params=params)
-        logger.info(f"Weather API response: {responses.status_code}")
         response = responses[0]
         hourly = response.Hourly()
         hourly_temperature_2m = hourly.Variables(0).ValuesAsNumpy()
@@ -86,7 +85,7 @@ def get_temp_at_2pm_by_date(lat, lon):
         df = df[df["date"].dt.hour == 14]
         df["date"] = df["date"].dt.strftime("%Y-%m-%d")
 
-        return df.set_index("date")["temp"].to_dict()
+        return df.set_index("date")["temp"]
 
     except Exception as e:
         logger.error(f"Weather daily fetch failed: {e}")

@@ -139,7 +139,6 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
     "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
-    "EXCEPTION_HANDLER": "utils.custom_exception.custom_exception_handler",
     "DEFAULT_RENDERER_CLASSES": ("utils.response_wrapper.CustomRenderer",),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 20,
@@ -178,7 +177,11 @@ CELERY_BEAT_SCHEDULE = {
     },
     "collect_and_cache_district_data": {
         "task": "recommender.tasks.scheduled_cache_district_data",
-        "schedule": crontab(minute="*/59"),
+        "schedule": crontab(minute="*/60"),
+    },
+    "cache_daily_district_data": {
+        "task": "recommender.tasks.cache_daily_district_data_task",
+        "schedule": crontab(hour=12, minute=0),
     },
 }
 
