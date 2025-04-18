@@ -9,6 +9,8 @@ from django.core.cache import cache
 from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
 from utils.response_wrapper import ResponseWrapper
+from drf_yasg.utils import swagger_auto_schema
+from recommender.serializers import TravelQueryParamsSerializer, TopDistrictsSerializer
 from datetime import datetime
 import re
 import json
@@ -38,30 +40,42 @@ class HealthCheckCustomView(MainView):
 
 
 class TopDistrictViewSet(viewsets.ViewSet):
+    @swagger_auto_schema(
+        operation_summary="Get top districts based on temperature and air quality",
+        operation_description="This endpoint provides a list of top districts based on temperature and air quality.",
+        query_serializer=TopDistrictsSerializer,
+    )
     def list(self, request):
         keys = cache.keys("district_data_*")
-        district_data = []
-        for key in keys:
-            data = cache.get(key)
-            if data:
-                district_data.append(json.loads(data))
-
-        district_data = sorted(
-            district_data, key=lambda x: (x["avg_temp"], x["air_quality"])
-        )
-
-        if not district_data:
+        if not keys:
             logger.warning("No district data found in cache.")
             return ResponseWrapper(
                 status=status.HTTP_404_NOT_FOUND,
                 error_message="No district data found.",
                 error_code=404,
             )
+
+        district_data = []
+        for key in keys:
+            data = cache.get(key)
+            if data:
+                district_data.append(json.loads(data))
+
+        if not district_data:
+            logger.warning("No district data found in cache after filtering.")
+            return ResponseWrapper(
+                status=status.HTTP_404_NOT_FOUND,
+                error_message="No district data found.",
+                error_code=404,
+            )
+
+        district_data = sorted(
+            district_data, key=lambda x: (x["avg_temp"], x["air_quality"])
+        )
         logger.info(f"Total districts found: {len(district_data)}")
 
         # pagination
         paginator = PageNumberPagination()
-        # default page size 10, take from params
         paginator.page_size = request.query_params.get("page_size", 10)
         page = paginator.paginate_queryset(district_data, request, view=self)
         if page is not None:
@@ -76,16 +90,25 @@ class TopDistrictViewSet(viewsets.ViewSet):
 
 
 class TravelRecommendationViewSet(viewsets.ViewSet):
-    def list(self, request):
-        lat, lon, des_name, date = self.extract_and_validate_params(request)
-        if isinstance(lat, ResponseWrapper):
-            return lat
 
-        current_location_data, destination_data = self.fetch_cached_data(
-            lat, lon, des_name, date
-        )
-        if isinstance(current_location_data, ResponseWrapper):
-            return current_location_data
+    @swagger_auto_schema(
+        operation_summary="Get travel recommendation based on location and date",
+        operation_description="This endpoint provides a travel recommendation based on the current location and destination district's temperature and air quality.",
+        query_serializer=TravelQueryParamsSerializer,
+    )
+    def list(self, request):
+        try:
+            lat, lon, des_name, date = self.extract_and_validate_params(request)
+            current_location_data, destination_data = self.fetch_cached_data(
+                lat, lon, des_name, date
+            )
+        except Exception as e:
+            logger.error(f"Error extracting parameters: {e}")
+            return ResponseWrapper(
+                status=status.HTTP_400_BAD_REQUEST,
+                error_message="Invalid parameters.",
+                error_code=400,
+            )
 
         current_temp, destination_temp, current_air_quality, destination_air_quality = (
             self.extract_data(current_location_data, destination_data)
@@ -97,9 +120,9 @@ class TravelRecommendationViewSet(viewsets.ViewSet):
             destination_air_quality,
         ):
             return ResponseWrapper(
-                status=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                error_message="Temperature or air quality data is missing for the given date.",
-                error_code=422,
+                status=status.HTTP_404_NOT_FOUND,
+                error_message="Data not found for the given location or destination.",
+                error_code=404,
             )
 
         recommendation, reasons, short_reason = self.generate_recommendation(
@@ -127,11 +150,8 @@ class TravelRecommendationViewSet(viewsets.ViewSet):
         date = request.query_params.get("date")
 
         if not all([lat, lon, des_name, date]):
-            return ResponseWrapper(
-                status=status.HTTP_400_BAD_REQUEST,
-                error_message="Missing required parameters: lat, lon, name, date.",
-                error_code=400,
-            )
+            logger.error("Missing required parameters.")
+            raise ValueError("Missing required parameters.")
 
         try:
             lat = float(lat)
@@ -155,10 +175,8 @@ class TravelRecommendationViewSet(viewsets.ViewSet):
             logger.error(
                 f"District data not found for current location: {lat}, {lon} or destination: {des_name}."
             )
-            return ResponseWrapper(
-                status=status.HTTP_404_NOT_FOUND,
-                error_message="District data not found.",
-                error_code=404,
+            raise ValueError(
+                "District data not found for the given location or destination."
             )
 
         try:
@@ -166,11 +184,7 @@ class TravelRecommendationViewSet(viewsets.ViewSet):
             destination_data = json.loads(cache.get(destination_key[0]))
         except (TypeError, json.JSONDecodeError) as e:
             logger.error(f"Error decoding cached data: {e}")
-            return ResponseWrapper(
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                error_message="Error processing cached data.",
-                error_code=500,
-            )
+            raise ValueError("Error decoding cached data. Please try again later.")
 
         return current_location_data, destination_data
 

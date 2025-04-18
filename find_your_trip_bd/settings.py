@@ -173,15 +173,15 @@ CELERY_TIMEZONE = "Asia/Dhaka"
 CELERY_BEAT_SCHEDULE = {
     "load_districts": {
         "task": "recommender.tasks.load_districts_task",
-        "schedule": crontab(minute="*/59"),
+        "schedule": crontab(minute="*/30"),
     },
     "collect_and_cache_district_data": {
         "task": "recommender.tasks.scheduled_cache_district_data",
-        "schedule": crontab(minute="*/60"),
+        "schedule": crontab(minute="*/30"),
     },
     "cache_daily_district_data": {
         "task": "recommender.tasks.cache_daily_district_data_task",
-        "schedule": crontab(hour=12, minute=0),
+        "schedule": crontab(minute="0", hour="*/24"),
     },
 }
 
