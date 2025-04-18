@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 from decouple import config
 from corsheaders.defaults import default_headers
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -48,6 +49,7 @@ INSTALLED_APPS = [
     "health_check.db",
     "django_filters",
     "recommender.apps.RecommenderConfig",
+    "django_celery_beat",
 ]
 
 MIDDLEWARE = [
@@ -137,7 +139,6 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
     "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
-    "EXCEPTION_HANDLER": "utils.custom_exception.custom_exception_handler",
     "DEFAULT_RENDERER_CLASSES": ("utils.response_wrapper.CustomRenderer",),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 20,
@@ -146,7 +147,7 @@ REST_FRAMEWORK = {
 
 LOGGING = {
     "version": 1,
-    "disable_existing_loggers": False,
+    "disable_existing_loggers": True,
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
@@ -159,4 +160,37 @@ LOGGING = {
             "propagate": False,
         },
     },
+}
+
+# Celery Configuration
+CELERY_BROKER_URL = "redis://redis:6379/0"
+CELERY_ACCEPT_CONTENT = ["application/json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "Asia/Dhaka"
+
+# Celery Beat Settings
+CELERY_BEAT_SCHEDULE = {
+    "load_districts": {
+        "task": "recommender.tasks.load_districts_task",
+        "schedule": crontab(minute="*/30"),
+    },
+    "collect_and_cache_district_data": {
+        "task": "recommender.tasks.scheduled_cache_district_data",
+        "schedule": crontab(minute="*/30"),
+    },
+    "cache_daily_district_data": {
+        "task": "recommender.tasks.cache_daily_district_data_task",
+        "schedule": crontab(minute="0", hour="*/24"),
+    },
+}
+
+# Caching (Redis)
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://redis:6379/1",
+        "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
+        "KEY_PREFIX": "travel",
+    }
 }

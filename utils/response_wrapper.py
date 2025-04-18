@@ -3,7 +3,6 @@ from rest_framework.renderers import JSONRenderer
 
 
 class ResponseWrapper(Response):
-
     def __init__(
         self,
         data=None,
@@ -17,27 +16,16 @@ class ResponseWrapper(Response):
         response_success=True,
         status=None,
     ):
+        is_error = error_code is not None or (
+            status is not None and not (200 <= status <= 299)
+        )
 
-        if error_code is None and status is not None:
-            if status > 299 or status < 200:
-                error_code = status
-                response_success = False
-                data = data
-        if error_code is not None:
+        if is_error:
             response_success = False
-
             data = {
-                "code": error_code,
-                "reason": error_message,
-                "message": (
-                    message
-                    if message
-                    else (
-                        str(error_message)
-                        if error_message
-                        else "Success" if response_success else "Failed"
-                    )
-                ),
+                "code": error_code or status,
+                "reason": error_message or "Error",
+                "message": message or str(error_message) or "Failed",
                 "status": status,
             }
 
@@ -52,39 +40,49 @@ class ResponseWrapper(Response):
 
 
 class CustomRenderer(JSONRenderer):
-
     def render(self, data, accepted_media_type=None, renderer_context=None):
-        response = renderer_context["response"]
-        pagination = {"count": None, "next": None, "previous": None}
-        if data:
-            if "results" in data:
-                try:
-                    if data.get("results") is not None:
-                        pagination["count"] = data.pop("count")
-                        pagination["next"] = data.pop("next")
-                        pagination["previous"] = data.pop("previous")
-                        data = data.pop("results")
-                    else:
-                        error_code = 404
-                        error_message = "No data found"
-                        data = data.pop("results")
-                except:
-                    pass
+        response = renderer_context.get("response", None)
+        if not response:
+            return super().render(data, accepted_media_type, renderer_context)
 
-        if response.status_code in [400, 401, 403, 404, 405, 409, 500]:
-            error_code = response.status_code
+        status_code = response.status_code
+
+        # Handle paginated responses
+        if isinstance(data, dict) and "results" in data:
+            pagination = {
+                "count": data.pop("count", None),
+                "next": data.pop("next", None),
+                "previous": data.pop("previous", None),
+            }
+            results = data.pop("results", [])
+            return super().render(
+                {
+                    "pagination": pagination,
+                    "data": results,
+                    "status": status_code,
+                },
+                accepted_media_type,
+                renderer_context,
+            )
+
+        # Handle errors
+        if status_code >= 400:
             error_message = None
             if isinstance(data, dict):
-                error_message = data.get("detail", None)
+                error_message = data.get("detail") or data.get("message") or None
             elif isinstance(data, list):
                 error_message = str(data)
 
-            output_data = {
-                "code": error_code,
-                "reason": error_message,
-                "message": response.status_text,
-                "status": response.status_code,
-            }
-            return super().render(output_data, accepted_media_type, renderer_context)
+            return super().render(
+                {
+                    "code": status_code,
+                    "reason": error_message or "Something went wrong",
+                    "message": response.status_text,
+                    "status": status_code,
+                },
+                accepted_media_type,
+                renderer_context,
+            )
 
+        # Success response
         return super().render(data, accepted_media_type, renderer_context)

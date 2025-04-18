@@ -11,6 +11,9 @@ import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "find_your_trip_bd.settings")
+ENV_VAR = os.environ.get("ENV", "local")
+settings_module = "find_your_trip_bd." + ENV_VAR + "_settings"
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", settings_module)
 
 application = get_asgi_application()
