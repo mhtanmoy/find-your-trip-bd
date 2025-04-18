@@ -29,6 +29,7 @@ djangorestframework_simplejwt==5.5.0
 drf-yasg==1.21.7
 flatbuffers==25.2.10
 greenlet==3.2.0
+gunicorn==23.0.0
 idna==3.10
 inflection==0.5.1
 itypes==1.2.0

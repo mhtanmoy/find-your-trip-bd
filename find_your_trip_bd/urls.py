@@ -25,6 +25,7 @@ admin.site.index_title = "Find Your Trip BD Admin"
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("recommender.urls")),
+    path("auth/", include("userapp.urls")),
 ]
 if settings.DEBUG:
     optional_urlpatterns = [
