@@ -13,8 +13,8 @@ def get_air_quality(lat, lon):
 
     url = "https://air-quality-api.open-meteo.com/v1/air-quality"
     params = {
-        "latitude": 23.7115253,
-        "longitude": 90.4111451,
+        "latitude": lat,
+        "longitude": lon,
         "hourly": ["pm2_5"],
         "timezone": "Asia/Dhaka",
         "forecast_days": 7,
