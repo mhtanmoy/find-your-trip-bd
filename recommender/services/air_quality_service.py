@@ -44,7 +44,7 @@ def get_air_quality(lat, lon):
         logger.info(
             f"Average PM2.5 level at 2 PM: {avg} µg/m³ for coordinates ({lat}, {lon})"
         )
-        return float(round(avg, 2))
+        return round(float(avg), 2)
 
     except Exception as e:
         logger.error(f"Air quality fetch failed: {e}")

@@ -14,7 +14,7 @@ def load_districts():
             url = "https://raw.githubusercontent.com/strativ-dev/technical-screening-test/main/bd-districts.json"
             response = requests.get(url)
             data = response.json()
-            cache.set("district_data", data, timeout=60 * 60)
+            cache.set("district_data", data["districts"], timeout=60 * 60)
             logger.info("District data loaded from API and cached.")
             return data["districts"]
 

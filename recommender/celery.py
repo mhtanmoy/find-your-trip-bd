@@ -10,3 +10,15 @@ app = Celery("find_your_trip_bd")
 
 app.config_from_object("django.conf:settings", namespace="CELERY")
 app.autodiscover_tasks()
+
+
+@app.on_after_finalize.connect
+def setup_periodic_tasks(sender, **kwargs):
+    try:
+        from recommender.tasks import scheduled_cache_district_data, load_districts_task
+
+        load_districts_task.apply_async(countdown=30)
+        scheduled_cache_district_data.apply_async(countdown=120)
+
+    except Exception as e:
+        print(f"Error in setup_periodic_tasks: {e}")

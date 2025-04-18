@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 from decouple import config
 from corsheaders.defaults import default_headers
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -168,6 +169,18 @@ CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = "Asia/Dhaka"
+
+# Celery Beat Settings
+CELERY_BEAT_SCHEDULE = {
+    "load_districts": {
+        "task": "recommender.tasks.load_districts_task",
+        "schedule": crontab(minute="*/59"),
+    },
+    "collect_and_cache_district_data": {
+        "task": "recommender.tasks.scheduled_cache_district_data",
+        "schedule": crontab(minute="*/59"),
+    },
+}
 
 # Caching (Redis)
 CACHES = {

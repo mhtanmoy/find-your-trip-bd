@@ -17,6 +17,8 @@ def collect_and_cache_district_data():
         logger.error("No district data available.")
         return
 
+    logger.info(f"Found {len(districts)} districts to process.")
+
     for district in districts:
         name = district["name"]
         lat = district["lat"]

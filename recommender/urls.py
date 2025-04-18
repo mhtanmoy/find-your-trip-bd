@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework import routers
-from recommender.views import HealthCheckCustomView
+from recommender.views import HealthCheckCustomView, TopDistrictViewSet
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -12,6 +12,7 @@ class OptionalSlashRouter(routers.SimpleRouter):
 
 
 router = OptionalSlashRouter()
+router.register(r"top_districts", TopDistrictViewSet, basename="top_districts")
 
 
 urlpatterns = [

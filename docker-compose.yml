@@ -44,6 +44,20 @@ services:
       - web
       - redis
 
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery --app=recommender beat --loglevel=info
+    volumes:
+      - .:/app
+    environment:
+      - CELERY_BROKER=redis://redis:6379/0
+      - CELERY_BACKEND=redis://redis:6379/0
+    depends_on:
+      - web
+      - redis
+
   flower:
     image: mher/flower
     container_name: flower
