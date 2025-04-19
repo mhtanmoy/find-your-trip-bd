@@ -141,7 +141,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://{{localhost}}/api/top_districts/?page_size=",
+					"raw": "http://{{localhost}}/api/top_districts/",
 					"protocol": "http",
 					"host": [
 						"{{localhost}}"
@@ -154,7 +154,8 @@
 					"query": [
 						{
 							"key": "page_size",
-							"value": ""
+							"value": "",
+							"disabled": true
 						}
 					]
 				}
