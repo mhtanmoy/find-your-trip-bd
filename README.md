@@ -67,7 +67,7 @@ The project uses environment variables for various configurations (such as datab
 
 The project uses a `local_settings.py` file for environment-specific configurations, such as database connection details and API URLs.
 
-    Copy the contents of the `local_settings_example.py` file to create a new `local_settings.py` file in the same directory:
+Copy the contents of the `local_settings_example.py` file to create a new `local_settings.py` file in the same directory:
 
     ```bash
     cp find-your-trip-bd/local_settings_example.py find-your-trip-bd/local_settings.py
@@ -130,6 +130,13 @@ The project uses a `local_settings.py` file for environment-specific configurati
 
    Replace `your-secret-key` with a secure secret key for your Django application.
 
+
+### ⚠️ Avoiding Port Conflicts
+If you're running PostgreSQL or Redis locally on your machine (outside Docker), you may encounter port conflicts with the default Docker ports (5432 for PostgreSQL, 6379 for Redis). To avoid this:
+
+Option 1: Stop the local services that are using those ports before starting Docker.
+
+Option 2: Change the exposed ports in docker-compose.yml
 
 ## Build and Start the Docker Containers
 
