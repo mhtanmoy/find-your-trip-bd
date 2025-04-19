@@ -111,24 +111,12 @@
 		},
 		{
 			"name": "HealthCheck",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
 			"request": {
 				"auth": {
 					"type": "noauth"
 				},
 				"method": "GET",
 				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"email\": \"user1@example.com\",\r\n    \"password\": \"stringst\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
 				"url": {
 					"raw": "http://{{localhost}}/api/health_check/",
 					"protocol": "http",
@@ -153,7 +141,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://{{localhost}}/api/top_districts/",
+					"raw": "http://{{localhost}}/api/top_districts/?page_size=",
 					"protocol": "http",
 					"host": [
 						"{{localhost}}"
@@ -162,6 +150,12 @@
 						"api",
 						"top_districts",
 						""
+					],
+					"query": [
+						{
+							"key": "page_size",
+							"value": ""
+						}
 					]
 				}
 			},
