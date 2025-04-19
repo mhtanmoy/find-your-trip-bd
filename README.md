@@ -49,7 +49,7 @@ Start by cloning the repository to your local machine:
 
 ```
 git clone https://github.com/mhtanmoy/find-your-trip-bd.git
-cd find-you-trip-bd
+cd find-your-trip-bd
 ```
 
 ## Create a `.env` File
