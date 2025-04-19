@@ -63,6 +63,50 @@ The project uses environment variables for various configurations (such as datab
     cp .env.example .env
     ```
 
+4. Create a `local_settings.py` File
+
+The project uses a `local_settings.py` file for environment-specific configurations, such as database connection details and API URLs.
+
+    Copy the contents of the `local_settings_example.py` file to create a new `local_settings.py` file in the same directory:
+
+    ```bash
+    cp find-your-trip-bd/local_settings_example.py find-your-trip-bd/local_settings.py
+    ```
+
+    Edit the `local_settings.py` file with the necessary values. A typical `local_settings.py` file should include:
+
+    ```python
+    from decouple import config
+    from .settings import *
+    import os
+
+
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": config("DB_NAME"),
+            "USER": config("DB_USER"),
+            "PASSWORD": config("DB_PASSWORD"),
+            "HOST": config("DB_HOST"),
+            "PORT": config("DB_PORT"),
+            "ATOMIC_REQUESTS": True,
+        }
+    }
+
+
+    # General
+    DEBUG = True
+    STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+    STATICFILES_STORAGE = "utils.storages.CustomStaticFilesStorage"
+
+    # districts
+    DISTRICT_DATA_URL = config("DISTRICT_DATA_URL")
+    WEATHER_API_URL = config("WEATHER_API_URL")
+    AIR_QUALITY_API_URL = config("AIR_QUALITY_API_URL")
+
+    ```
+
+
 3. Edit the `.env` file with the necessary values. A typical `.env` file should include:
 
     ```
